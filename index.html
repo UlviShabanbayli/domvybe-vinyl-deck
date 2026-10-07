@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#EFE6D5">
+  <title>Slow Burn Records — Records worth turning over</title>
+  <meta name="description" content="Slow Burn Records, an independent label. Side A is on the deck: start it, scratch it, cue it — a real turntable in the browser.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=Inter:wght@400;500&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="sections.css">
+  <link rel="preload" as="image" href="img/deck.webp">
+</head>
+<body>
+  <!-- The page is the approved concept (concepts/concept_master.jpg, 2000 × 1244) sliced into layers by tools/slice.py.
+       Desktop places every block in concept pixels; the phone stacks the same blocks. -->
+  <div class="stage">
+    <img class="backdrop" src="img/backdrop.jpg" alt="" width="2000" height="1244" aria-hidden="true">
+
+    <header class="hero">
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="#top" data-nav="home" aria-current="location">HOME</a>
+        <a href="#artists" data-nav="artists">ARTISTS</a>
+        <a href="#releases" data-nav="releases">RELEASES</a>
+        <a href="#store" data-nav="store">STORE</a>
+        <a href="#about" data-nav="about">ABOUT</a>
+        <button type="button" class="nav-bag" data-bag-open aria-label="Bag, empty" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8.5h13l-1 11.5h-11z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/></svg>
+          <span class="bag-count" data-bag-count hidden>0</span>
+        </button>
+        <button type="button" class="nav-menu" data-menu-open aria-label="Menu" aria-haspopup="dialog" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg><span>Menu</span>
+        </button>
+        <span class="nav-mark" aria-hidden="true">Slow Burn Records</span>
+        <i class="nav-ink" aria-hidden="true"></i>
+      </nav>
+      <h1 class="headline"><span>An independent label for slow, warm records</span> <span>you'll want to turn over by hand</span></h1>
+    </header>
+
+    <!-- ===================== the deck (concept px 305,337 → 1290,1090) ===================== -->
+    <section class="deck" id="deck" aria-label="Turntable — Side A">
+      <img class="deck-img" src="img/deck.webp" alt="" width="1478" height="1130" draggable="false">
+      <img class="arm-base under" alt="" draggable="false" hidden>   <!-- the concept arm's bearing assembly (app.js sets the picture) -->
+      <!-- the platter: the strobe ring and the label turn; the light on them does not -->
+      <div class="ring" id="ring" aria-hidden="true"><img src="img/ring.webp" alt="" draggable="false"></div>
+      <img class="ring-light dodge" src="img/ring-dodge.webp" alt="" aria-hidden="true" draggable="false">
+      <img class="ring-light mult" src="img/ring-mult.webp" alt="" aria-hidden="true" draggable="false">
+      <div class="label" id="label" aria-hidden="true">
+        <img class="label-print" src="img/label.webp" alt="" draggable="false">
+        <canvas class="label-art"></canvas><canvas class="label-art"></canvas>   <!-- the playing track, printed (label.js) -->
+      </div>
+      <img class="spindle" src="img/spindle.webp" alt="" aria-hidden="true" draggable="false">
+      <div class="record-hit" id="record" role="img" aria-label="Record, Side A — drag it to scratch"></div>
+
+      <!-- our controls, where the concept has them -->
+      <button class="startstop" id="startstop" type="button" aria-pressed="false" aria-label="Start / stop"><img src="img/ctl-start.webp" alt="" draggable="false"></button>
+      <div class="speed" role="radiogroup" aria-label="Speed">
+        <span class="speed-cap" aria-hidden="true">RPM</span>
+        <button type="button" class="speed-33" role="radio" aria-checked="true" data-rpm="33">33</button>
+        <button type="button" class="speed-toggle" id="speed-toggle" aria-label="Toggle 33 / 45" tabindex="-1"><img src="img/ctl-toggle.webp" alt="" draggable="false"></button>
+        <button type="button" class="speed-45" role="radio" aria-checked="false" data-rpm="45">45</button>
+      </div>
+      <img class="vu-face l" src="img/ctl-vu-l.webp" alt="" aria-hidden="true" draggable="false">
+      <img class="vu-face r" src="img/ctl-vu-r.webp" alt="" aria-hidden="true" draggable="false">
+      <div class="vu-window l" aria-hidden="true"><i class="vu-needle" id="vu-l"></i></div>
+      <div class="vu-window r" aria-hidden="true"><i class="vu-needle" id="vu-r"></i></div>
+      <svg class="pitch-scale" viewBox="305 337 985 753" aria-hidden="true">
+        <rect class="slot" x="1211" y="722" width="8" height="216" rx="4"/>
+        <g class="ticks"></g>
+        <text x="1186" y="735" text-anchor="end">+8</text><text x="1186" y="936" text-anchor="end">−8</text>
+        <text class="pitch-word" x="1215" y="958" text-anchor="middle">PITCH</text>
+      </svg>
+      <i class="led" id="led" aria-hidden="true"></i>
+      <div class="fader" id="fader" role="slider" tabindex="0" aria-label="Pitch" aria-valuemin="-8" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0.0 %">
+        <img src="img/fader-cap.webp" alt="" draggable="false">
+      </div>
+
+      <!-- the tonearm: the concept's own (default) or ours (?arm=ours) — app.js sets the pictures. Two pre-blurred
+           shadows (near: lowered, far: lifted) are cross-faded as the cue lever raises it. -->
+      <img class="arm-base over" alt="" draggable="false" hidden>
+      <img class="arm-shadow" id="arm-shadow-near" alt="" aria-hidden="true" draggable="false">
+      <img class="arm-shadow" id="arm-shadow-far" alt="" aria-hidden="true" draggable="false">
+      <div class="arm" id="arm" role="slider" tabindex="0" aria-label="Tonearm — drag to cue, or Enter to lift and ← → to swing" aria-valuemin="0" aria-valuemax="143" aria-valuenow="0">
+        <img id="arm-img" alt="" draggable="false">
+      </div>
+    </section>
+
+    <!-- ===================== the side: sleeve, record, tray, Now-playing (concept px 1290,362 → 1812,1064) ===================== -->
+    <section class="side" aria-labelledby="np-title">
+      <img class="side-img" src="img/side.webp" alt="Album sleeve with abstract black, vermilion and teal art, the record half out of it" width="783" height="1053">
+      <h2 class="sr-only" id="np-title">Now-playing — track list</h2>
+      <ol class="tracks" id="tracks"></ol>
+      <p class="np-status" aria-live="polite"><span id="np-now">Needle up</span><span id="np-rpm">33⅓ rpm</span></p>
+    </section>
+
+    <!-- ===================== below the fold ===================== -->
+    <section class="more" id="more">
+      <h2>Pressed slowly. Played loud.</h2>
+      <div class="more-cols">
+        <p>Slow Burn is a small label for records that take their time: eight short pieces on Side A, cut warm, pressed in runs of five hundred. The deck above is real — press START/STOP and the platter spins up; press it again and the music winds down with it.</p>
+        <p>Hold the record to scratch; it runs backwards if your hand does. Lift the arm and drop it anywhere on the side, or pick a track and the arm finds the groove. The meters read the music as it plays; the fader bends the pitch ±8 %.</p>
+      </div>
+      <!-- sections:start — sections.js fills the lists from data.js; the words below are the page without JS too -->
+      <div class="sb" id="sections">
+        <section class="sb-sec" id="artists" aria-labelledby="artists-h" data-spy="artists">
+          <header class="sb-head">
+            <p class="sb-eyebrow"><span>01</span> The roster</p>
+            <h2 id="artists-h" tabindex="-1">Four artists, one warm room.</h2>
+            <p class="sb-lede">Everyone on Side A, credited by name. Press play on any of their tracks and the deck above cues the needle to it.</p>
+          </header>
+          <ul class="artists" id="artist-list" role="list"></ul>
+        </section>
+
+        <section class="sb-sec" id="releases" aria-labelledby="releases-h" data-spy="releases">
+          <header class="sb-head">
+            <p class="sb-eyebrow"><span>02</span> Releases</p>
+            <h2 id="releases-h" tabindex="-1">Three records, cut from one side.</h2>
+            <p class="sb-lede">Two EPs and a single. Put one on the deck: the arm goes home, the label changes, and the Now-playing list becomes its tracklist.</p>
+          </header>
+          <ul class="releases" id="release-list" role="list"></ul>
+        </section>
+
+        <section class="sb-sec" id="store" aria-labelledby="store-h" data-spy="store">
+          <header class="sb-head">
+            <p class="sb-eyebrow"><span>03</span> Store</p>
+            <h2 id="store-h" tabindex="-1">Take one home.</h2>
+            <p class="sb-lede">180&nbsp;g vinyl, cut at half speed, in a heavy board sleeve with a printed inner. Small runs; when a run is gone, it is gone.</p>
+          </header>
+          <div class="counter sb-leather">
+            <ul class="products" id="product-list" role="list"></ul>
+            <p class="counter-foot"><span>Flat shipping $6 · free from $60</span><span>Ships in 3–5 days, in a rigid mailer</span></p>
+          </div>
+        </section>
+
+        <section class="sb-sec about" id="about" aria-labelledby="about-h" data-spy="about">
+          <header class="sb-head">
+            <p class="sb-eyebrow"><span>04</span> About</p>
+            <h2 id="about-h" tabindex="-1">A label that waits for the record.</h2>
+          </header>
+          <div class="about-cols">
+            <div class="about-story">
+              <p class="about-lede">Slow Burn started in a back room with one turntable, two friends and a rule: nothing goes out until it sounds right on a cheap speaker at two in the morning.</p>
+              <p>We press small runs on heavy vinyl and we cut them slowly. Every record is mastered for the groove, not for a playlist, so it sounds warm at a sensible volume and opens up when you turn it up.</p>
+              <p>Four artists, one side of music, three records so far. We answer every letter, and we still pack the orders ourselves.</p>
+              <dl class="about-facts">
+                <div><dt>Founded</dt><dd>2019</dd></div>
+                <div><dt>Runs</dt><dd>300–500</dd></div>
+                <div><dt>Weight</dt><dd>180&nbsp;g</dd></div>
+              </dl>
+            </div>
+            <form class="letter sb-leather" id="letter" novalidate aria-labelledby="letter-h">
+              <h3 id="letter-h">The monthly letter</h3>
+              <p class="letter-copy">New pressings before they sell out, test cuts, and what we are listening to. Once a month, never more.</p>
+              <div class="letter-row" id="letter-row">
+                <label class="letter-label" for="letter-email">Email</label>
+                <div class="letter-field">
+                  <input id="letter-email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" placeholder="you@example.com" aria-describedby="letter-error" required>
+                  <button type="submit" class="btn btn-metal">Sign up</button>
+                </div>
+                <p class="letter-error" id="letter-error" aria-live="polite"></p>
+              </div>
+              <p class="letter-thanks" id="letter-thanks" tabindex="-1" hidden>Thanks — you're on the list.</p>
+              <p class="letter-note">Kept in this browser only — this is a demo, nothing is sent.</p>
+            </form>
+          </div>
+        </section>
+      </div>
+      <p class="sr-only" id="sb-live" aria-live="polite"></p>
+      <!-- sections:end -->
+      <footer class="foot">
+        <p>© 2026 Slow Burn Records · a DOMVYBE demo · Space start/stop · ← → tracks</p>
+        <p class="foot-credit">Turntable and sleeve imagery generated with Google Gemini · music and code by Code with Ulvi · <a href="https://domvybe.com">domvybe.com</a></p>
+      </footer>
+    </section>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="catalog.js"></script>
+  <script src="geometry.js"></script>
+  <script src="motor.js"></script>
+  <script src="audio.js"></script>
+  <script src="deck.js"></script>
+  <script src="label.js"></script>
+  <script src="app.js"></script>
+  <script src="sections.js"></script>
+</body>
+</html>

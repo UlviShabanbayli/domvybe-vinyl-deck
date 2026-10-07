@@ -1,0 +1,234 @@
+/* Slow Burn Records — DV41, v2: the approved concept, sliced (tools/slice.py); the concept's own tonearm (tools/arm.py,
+   ?arm=ours for the Gemini one) and our controls.
+
+   Units: --m is one CONCEPT pixel (concept_master.jpg is 2000 × 1244). On desktop the stage is the concept at
+   min(100vw, 1600px) wide and every block sits at its concept coordinates. Inside the deck and the side, --m is
+   re-derived from the block's own width (container units), so the same coordinates work when the phone stacks them.
+
+   1 tokens   2 page + stage   3 hero   4 deck: layers, platter, controls, arm   5 side: Now-playing   6 below
+   7 phones and upright tablets   8 touch targets   9 reduced motion */
+
+/* ---- 1. TOKENS ---- */
+:root {
+  /* primitive — sampled from the concept */
+  --cream-page: #EFE6D5; --cream-card: #F8F2E4; --ink-hero: #232323; --ink-900: #1E1E1E; --ink-600: #5E5A52;
+  --hero-text: #F1E7D2; --nav-text: #CFC8BA; --nav-on: #F4EEE2;
+  --np-text: #E2E0DC; --np-muted: #9C9A95; --np-row-on: #474644; --np-row-edge: rgb(255 255 255 / .07);
+  --led-on: #6CFF7E; --needle: #1B1714; --scale-ink: #3B3936;
+  --focus: #F5B54A;
+  /* semantic */
+  --page: var(--cream-page); --card: var(--cream-card); --on-card: var(--ink-900); --on-card-muted: var(--ink-600);
+  --serif: 'Newsreader', 'Times New Roman', serif;
+  --sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* one concept px: the concept fills the width (up to 1600 px) unless the screen is short — then the whole deck
+     (concept y 0 … 1090, with a little air) still fits the first screen */
+  --m: min(calc(min(100vw, 1600px) / 2000), calc((100svh - 14px) / 1098));
+}
+
+/* ---- 2. PAGE + STAGE ---- */
+* { box-sizing: border-box; }
+html { background: var(--page); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--on-card); font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { display: block; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.stage { position: relative; width: calc(2000 * var(--m)); margin: 0 auto; }
+.backdrop { width: 100%; height: auto; user-select: none; pointer-events: none; }
+
+/* ---- 3. HERO (text over the backdrop's black panel) ---- */
+.hero { position: absolute; inset: 0 0 auto 0; height: calc(330 * var(--m)); pointer-events: none; }
+.hero > * { pointer-events: auto; }
+.nav { position: absolute; top: calc(124 * var(--m)); left: calc(1326 * var(--m)); display: flex; gap: 0; }
+.nav a {
+  position: absolute; white-space: nowrap; font-size: calc(15.6 * var(--m)); letter-spacing: .04em; color: var(--nav-text);
+  line-height: 1; padding: calc(4 * var(--m)) 0 calc(7 * var(--m));
+}
+.nav a:nth-child(1) { left: 0; } .nav a:nth-child(2) { left: calc(94 * var(--m)); } .nav a:nth-child(3) { left: calc(205 * var(--m)); }
+.nav a:nth-child(4) { left: calc(330 * var(--m)); } .nav a:nth-child(5) { left: calc(427 * var(--m)); }
+.nav a[aria-current="page"] { color: var(--nav-on); box-shadow: inset 0 calc(-1.6 * var(--m)) 0 var(--nav-on); }
+.nav a:hover { color: #fff; }
+.headline {
+  position: absolute; left: 0; right: 0; top: calc(194 * var(--m)); margin: 0; text-align: center;
+  font: 400 calc(54 * var(--m))/1 var(--serif); font-variation-settings: 'opsz' 48; letter-spacing: -.012em; color: var(--hero-text);
+}
+.headline span { display: block; height: calc(53 * var(--m)); }
+
+/* ---- 4. THE DECK ---- */
+.deck {
+  position: absolute; left: calc(305 * var(--m)); top: calc(337 * var(--m)); width: calc(985 * var(--m)); aspect-ratio: 985 / 753;
+  container-type: inline-size; isolation: isolate; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+}
+.deck > * { --m: calc(100cqw / 985); position: absolute; }
+.deck-img { inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.ring, .label {
+  left: calc((var(--cx) - var(--r) - 305) * var(--m)); top: calc((var(--cy) - var(--r) - 337) * var(--m));
+  width: calc(2 * var(--r) * var(--m)); height: calc(2 * var(--r) * var(--m));
+  scale: 1 var(--k); will-change: transform; pointer-events: none;     /* app.js writes transform: rotate(); the squash stays outside it */
+}
+.ring img, .label img, .label canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the label print: the concept's own until a track is lit, then the track's (label.js), cross-faded */
+.label .label-print { transition: opacity .2s; }
+.label .label-print.off { opacity: 0; }
+.label canvas { opacity: .002; transition: opacity .2s; }   /* never 0: kept rastered for the first cross-fade */
+.label canvas.on { opacity: 1; }
+.ring { --cx: 697.3; --cy: 705.5; --r: 360; --k: .966; }
+.label { --cx: 697.5; --cy: 702; --r: 113; --k: .977; }
+.ring-light { left: calc((336.667 - 305) * var(--m)); top: calc((357.333 - 337) * var(--m)); width: calc(720.667 * var(--m)); height: calc(696 * var(--m)); pointer-events: none; }
+.ring-light.dodge { mix-blend-mode: color-dodge; }
+.ring-light.mult { mix-blend-mode: multiply; }
+.spindle { left: calc((686.5 - 305) * var(--m)); top: calc((691 - 337) * var(--m)); width: calc(22 * var(--m)); height: calc(22 * var(--m)); pointer-events: none; }
+.record-hit { left: calc((697.5 - 322 - 305) * var(--m)); top: calc((702 - 322 - 337) * var(--m)); width: calc(644 * var(--m)); height: calc(644 * var(--m)); border-radius: 50%; cursor: grab; touch-action: none; }
+.record-hit:active { cursor: grabbing; }
+
+/* controls */
+.startstop { --w: calc(72 * var(--m)); --h: var(--w); left: calc((351 - 305) * var(--m)); top: calc((982 - 337) * var(--m)); width: var(--w); height: var(--h); padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer;
+  filter: drop-shadow(0 calc(2 * var(--m)) calc(3 * var(--m)) rgb(0 0 0 / .35)); transition: transform .08s, filter .08s; }
+.startstop img { width: 100%; height: 100%; }
+.startstop:active, .startstop.pressed { transform: scale(.965); filter: drop-shadow(0 calc(1 * var(--m)) calc(1 * var(--m)) rgb(0 0 0 / .4)) brightness(.94); }
+
+.speed { left: calc((442 - 305) * var(--m)); top: calc((1004 - 337) * var(--m)); width: calc(100 * var(--m)); height: calc(52 * var(--m)); }
+.speed > * { position: absolute; }
+.speed-cap { left: 0; right: 0; top: 0; text-align: center; font: 500 calc(9.5 * var(--m))/1 var(--sans); letter-spacing: .12em; color: var(--scale-ink); }
+.speed button { border: 0; background: none; padding: 0; cursor: pointer; }
+.speed-33, .speed-45 { --w: calc(20 * var(--m)); --h: calc(11 * var(--m)); top: calc(24 * var(--m)); width: var(--w); height: var(--h); font: 500 calc(11 * var(--m))/1 var(--sans); color: var(--scale-ink); opacity: .55; }
+.speed-33 { left: 0; } .speed-45 { right: 0; }
+.speed [aria-checked="true"] { opacity: 1; }
+.speed-toggle { --w: calc(56 * var(--m)); --h: calc(30.6 * var(--m)); left: calc(22 * var(--m)); top: calc(14 * var(--m)); width: var(--w); height: var(--h); }
+.speed-toggle img { position: absolute; left: 50%; top: 50%; width: calc(30.6 * var(--m)); height: calc(56 * var(--m)); transform: translate(-50%, -50%) rotate(-90deg) scaleY(var(--flip, 1)); transition: transform .12s; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .3)); }
+.speed[data-rpm="45"] .speed-toggle img { --flip: -1; }
+
+.vu-face { top: calc((962.2 - 337) * var(--m)); width: calc(122 * var(--m)); height: calc(87.5 * var(--m)); pointer-events: none; filter: drop-shadow(0 calc(3 * var(--m)) calc(4 * var(--m)) rgb(0 0 0 / .35)); }
+.vu-face.l { left: calc((982 - 305) * var(--m)); } .vu-face.r { left: calc((1116 - 305) * var(--m)); }
+/* VU needles: HTML, not SVG — a transform on an SVG element relays the SVG out every frame */
+.vu-window { top: calc((963 - 337) * var(--m)); width: calc(118 * var(--m)); height: calc(56 * var(--m)); overflow: hidden; pointer-events: none; }
+.vu-window.l { left: calc((984 - 305) * var(--m)); } .vu-window.r { left: calc((1118 - 305) * var(--m)); }
+.vu-needle {   /* the needle line (1059.7 → 1100.7, y 1031.2, 1.5 wide, round caps) about its pivot 16 px to its left */
+  position: absolute; left: calc(74.95 * var(--m)); top: calc(67.45 * var(--m)); width: calc(42.5 * var(--m)); height: calc(1.5 * var(--m));
+  border-radius: calc(.75 * var(--m)); background: var(--needle); transform-origin: calc(-15.25 * var(--m)) 50%; transform: rotate(-132.6deg);
+}
+.pitch-scale { inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.pitch-scale .slot { fill: #141414; stroke: rgb(255 255 255 / .55); stroke-width: .8; }
+.pitch-scale .ticks line { stroke: var(--scale-ink); stroke-width: 1.1; }
+.pitch-scale text { font: 500 9px var(--sans); fill: var(--scale-ink); }
+.pitch-scale .pitch-word { font-size: 8.5px; letter-spacing: .14em; }
+
+.led { left: calc((1176 - 4.5 - 305) * var(--m)); top: calc((830 - 4.5 - 337) * var(--m)); width: calc(9 * var(--m)); height: calc(9 * var(--m)); border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #8A968B, #39463B 70%); box-shadow: 0 0 0 calc(1 * var(--m)) rgb(0 0 0 / .25), inset 0 1px 1px rgb(0 0 0 / .5); transition: background .15s, box-shadow .15s; }
+.led.on { background: radial-gradient(circle at 40% 35%, #F0FFF1, var(--led-on) 45%, #22A63C); box-shadow: 0 0 0 calc(1 * var(--m)) rgb(0 0 0 / .2), 0 0 calc(8 * var(--m)) calc(2 * var(--m)) rgb(108 255 126 / .6); }
+
+.fader { left: calc((1195 - 305) * var(--m)); top: calc((805.7 - 337) * var(--m)); width: calc(40 * var(--m)); height: calc(48.6 * var(--m)); cursor: ns-resize; border-radius: calc(3 * var(--m)); touch-action: none; }
+.fader img { width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(0 calc(3 * var(--m)) calc(3 * var(--m)) rgb(0 0 0 / .45)); }
+
+/* the arm: a picture that turns about its bearing (transform-origin) and grows a little as the cue lever raises it
+   (app.js), with two pre-blurred shadow pictures under it (near: lowered, far: lifted) that app.js cross-fades and
+   offsets — no CSS filter is animated. The box of each picture is in concept px (tools/arm_geo.json for the concept's). */
+.arm-base, .arm-shadow, .arm { pointer-events: none; }
+.arm img { width: 100%; height: 100%; }
+.arm, .arm-shadow { will-change: transform; }
+.arm-shadow { opacity: .002; }
+.arm-base.under { left: calc((987.667 - 305) * var(--m)); top: calc((389 - 337) * var(--m)); width: calc(266 * var(--m)); height: calc(266 * var(--m)); }
+.arm-base.over { left: calc((1010.6 - 305) * var(--m)); top: calc((418.5 - 337) * var(--m)); width: calc(213.9 * var(--m)); height: auto;
+  filter: drop-shadow(0 calc(3 * var(--m)) calc(5 * var(--m)) rgb(0 0 0 / .5)); }
+.deck[data-arm="concept"] .arm {
+  left: calc((828.333 - 305) * var(--m)); top: calc((377.667 - 337) * var(--m)); width: calc(390.667 * var(--m)); height: calc(551.333 * var(--m));
+  transform-origin: calc(302.467 * var(--m)) calc(104.833 * var(--m));
+}
+.deck[data-arm="concept"] .arm-shadow {
+  left: calc((815 - 305) * var(--m)); top: calc((364.333 - 337) * var(--m)); width: calc(417.333 * var(--m)); height: calc(578 * var(--m));
+  transform-origin: calc(315.8 * var(--m)) calc(118.167 * var(--m));
+}
+.deck[data-arm="ours"] .arm {
+  left: calc((618.55 - 305) * var(--m)); top: calc((455.51 - 337) * var(--m)); width: calc(642.1 * var(--m)); height: calc(133.5 * var(--m));
+  transform-origin: calc(509.4 * var(--m)) calc(67.65 * var(--m));
+}
+.deck[data-arm="ours"] .arm-shadow {
+  left: calc((605.217 - 305) * var(--m)); top: calc((442.177 - 337) * var(--m)); width: calc(668.667 * var(--m)); height: calc(160 * var(--m));
+  transform-origin: calc(522.733 * var(--m)) calc(80.983 * var(--m));
+}
+.arm:focus-visible { outline: none; }
+.arm:focus-visible img { filter: drop-shadow(0 0 2px var(--focus)); }
+.deck.grab-arm, .deck.grab-arm * { cursor: grabbing !important; }
+
+/* ---- 5. THE SIDE: Now-playing rows over the sliced panel ---- */
+.side { position: absolute; left: calc(1290 * var(--m)); top: calc(362 * var(--m)); width: calc(522 * var(--m)); aspect-ratio: 522 / 702; container-type: inline-size; }
+.side > * { --m: calc(100cqw / 522); }
+.side { --ox: 1290; --oy: 362; }                 /* the concept point at the block's top-left (the phone crops to the panel) */
+.side-img { position: absolute; left: calc((1290 - var(--ox)) * var(--m)); top: calc((362 - var(--oy)) * var(--m)); width: calc(522 * var(--m)); height: calc(702 * var(--m)); }
+.tracks { position: absolute; left: calc((1547 - var(--ox)) * var(--m)); top: calc((482 - var(--oy)) * var(--m)); width: calc(240 * var(--m)); margin: 0; padding: 0; list-style: none; }
+.tracks button {
+  display: grid; grid-template-columns: calc(28 * var(--m)) 1fr auto; align-items: center; width: 100%; height: calc(34.4 * var(--m));
+  padding: 0 calc(15 * var(--m)) 0 calc(13 * var(--m)); border: 0; border-radius: calc(4 * var(--m)); background: transparent; cursor: pointer; text-align: left;
+  font-size: calc(15.6 * var(--m)); color: var(--np-text); letter-spacing: .005em; transition: background .25s;
+}
+.tracks button:hover { background: rgb(255 255 255 / .04); }
+.tracks .no { font-size: calc(14.5 * var(--m)); color: #CFCDC8; }
+.tracks .ti { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tracks .du { font-size: calc(12.6 * var(--m)); color: var(--np-muted); font-variant-numeric: tabular-nums; }
+.tracks button[aria-current="true"] { background: var(--np-row-on); box-shadow: inset 0 1px 0 var(--np-row-edge), 0 1px 2px rgb(0 0 0 / .35); color: #F2F1EE; }
+.tracks button[aria-current="true"] .du { color: #E6E4E0; }
+.np-status { position: absolute; left: calc((1560 - var(--ox)) * var(--m)); width: calc(214 * var(--m)); top: calc((1000 - var(--oy)) * var(--m)); margin: 0;
+  display: flex; justify-content: space-between; font-size: calc(11.5 * var(--m)); color: #7E7C78; font-variant-numeric: tabular-nums; }
+
+/* ---- 6. BELOW THE FOLD: the card continues ---- */
+.more { position: relative; margin: calc(-52 * var(--m)) calc(107 * var(--m)) 0; padding: 0 calc(198 * var(--m)) calc(80 * var(--m)); background: var(--card); border-radius: 0 0 calc(14 * var(--m)) calc(14 * var(--m)); }
+.more h2 { margin: 0; font: 400 calc(62 * var(--m))/1 var(--serif); letter-spacing: -.015em; color: var(--ink-900); }
+.more-cols { display: grid; grid-template-columns: 1fr 1fr; gap: calc(60 * var(--m)); margin-top: calc(34 * var(--m)); max-width: calc(1200 * var(--m)); }
+.more-cols p { margin: 0; font-size: max(14px, calc(19 * var(--m))); line-height: 1.6; color: var(--on-card-muted); }
+.foot { margin-top: calc(70 * var(--m)); padding-top: calc(20 * var(--m)); border-top: 1px solid rgb(30 30 30 / .12); font-size: 12px; color: #8A857A; }
+
+/* ---- 7. PHONES AND TABLETS UPRIGHT: hero, the deck full width, the side below ---- */
+@media (max-width: 760px), (orientation: portrait) and (max-width: 1100px) {
+  :root { --m: 1px; }
+  .stage { width: auto; padding: 10px; }
+  .backdrop { display: none; }
+  .hero { position: relative; height: auto; background: var(--ink-hero); border-radius: 14px; padding: 20px 16px 34vw; }
+  .nav { position: static; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+  .nav a { position: static; font-size: 10.5px; padding: 3px 0 5px; }
+  .nav a[aria-current="page"] { box-shadow: inset 0 -1px 0 var(--nav-on); }
+  .headline { position: static; margin-top: 24px; font-size: clamp(24px, 7vw, 30px); line-height: 1.1; }
+  .headline span { display: inline; height: auto; }
+  .deck { position: relative; left: 0; top: 0; width: 100%; margin-top: -30vw; box-shadow: 0 18px 30px -12px rgb(40 26 12 / .55); }
+  .side { position: relative; left: 0; top: 0; width: 100%; margin-top: 18px; border-radius: 10px; overflow: hidden; }
+  .more { margin: 22px 0 0; padding: 30px 18px 26px; border-radius: 14px; }
+  .more h2 { font-size: 34px; }
+  .more-cols { grid-template-columns: 1fr; gap: 14px; margin-top: 18px; }
+  .more-cols p { font-size: 15px; }
+  .foot { margin-top: 30px; }
+}
+
+/* narrow phones: the side shows the Now-playing panel only (the sleeve is cropped off), at a size where every row is a
+   44 px target */
+@media (max-width: 560px) {
+  .side { --ox: 1505; --oy: 372; aspect-ratio: auto; height: calc((100vw - 20px) / 307 * 110 + 8 * 44px + 44px); }
+  .side > *, .side::before { --m: calc(100cqw / 307); }
+  .side-img { display: none; }                    /* the panel is painted as a background: the sleeve is cropped off */
+  .side::before { content: ''; position: absolute; inset: 0; background: url(img/side.webp) no-repeat;
+    background-size: calc(522 * var(--m)) calc(702 * var(--m)); background-position: calc((1290 - var(--ox)) * var(--m)) calc((362 - var(--oy)) * var(--m)); }
+  .tracks button { height: 44px; }
+  .np-status { top: auto; bottom: 16px; }
+}
+
+/* ---- 8. TOUCH: every control a 44 px target. The picture keeps its size; the box grows round it (padding, pulled
+   back by a negative margin) ---- */
+@media (pointer: coarse) {
+  .startstop, .speed button {
+    box-sizing: content-box; --px: max(0px, (46px - var(--w)) / 2); --py: max(0px, (46px - var(--h)) / 2);
+    padding: var(--py) var(--px); margin: calc(-1 * var(--py)) calc(-1 * var(--px));
+  }
+  /* 33 grows to the left and 45 to the right. The grown boxes still overlap their neighbours (START ↔ 33 are closer than
+     44 px on a phone): app.js gives a touch to the control whose picture centre is nearest, so no area is shared */
+  .speed .speed-33 { padding: var(--py) 0 var(--py) calc(2 * var(--px)); margin: calc(-1 * var(--py)) 0 calc(-1 * var(--py)) calc(-2 * var(--px)); }
+  .speed .speed-45 { padding: var(--py) calc(2 * var(--px)) var(--py) 0; margin: calc(-1 * var(--py)) calc(-2 * var(--px)) calc(-1 * var(--py)) 0; }
+  .fader::before { content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 46px); height: max(100%, 46px); transform: translate(-50%, -50%); }
+}
+/* (the Now-playing rows: 44 px wherever the layout stacks — upright tablets by their size, narrow phones by the panel
+   crop above. In the concept's side-by-side composition on a phone held sideways they keep the concept's height:
+   eight rows must fit its panel.) */
+
+/* ---- 9. REDUCED MOTION: no ramps (app.js), no transitions ---- */
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
